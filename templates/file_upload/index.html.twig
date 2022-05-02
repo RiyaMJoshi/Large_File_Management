@@ -11,9 +11,9 @@
 <div class="example-wrapper">
     <h1>Manage Your Large CSVs</h1>
     <span class="mb-4">Make CSV files easy to operate by managing them to in various ways.</span>
-    <form action="#" method="POST" class="file-top-margin">
+    <form action="{{path('app_upload_file')}}" method="post" class="file-top-margin" enctype="multipart/form-data">
         <div>
-            <input class="form-control" type="file" id="formFile">
+            <input class="form-control" type="file" id="formFile" name="formFile"  accept=".csv, .zip" >
         </div>
 
         <div>
