@@ -10,14 +10,14 @@
 
 <div class="example-wrapper">
     <h1>Manage Your Large CSVs</h1>
-    <span class="mb-4">Make CSV files easy to operate by managing them to in various ways.</span>
+    <span class="mb-4">Make CSV files easy to operate by managing them in various ways.</span>
     <form action="{{path('app_upload_file')}}" method="post" class="file-top-margin" enctype="multipart/form-data">
         <div>
-            <input class="form-control" type="file" id="formFile" name="formFile"  accept=".csv, .zip" >
+            <input class="form-control" type="file" id="formFile" name="formFile"  accept=".csv, .zip" required="required">
         </div>
 
         <div>
-            <input class="mt-4 btn btn-primary" type="submit" id="formSubmit">
+            <input class="mt-4 btn btn-primary" type="submit" id="formSubmit" value="Upload File">
         </div>
     </form>
 </div>
