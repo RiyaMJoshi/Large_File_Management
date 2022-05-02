@@ -3,40 +3,41 @@
 namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\Request;
-use App\Service\FileUploader;
 
 class FileUploadController extends AbstractController
 {
-    #[Route('/', name: 'app_homepage')]
-    public function index(): Response
+    #[Route('/', name:'app_homepage')]
+function index(): Response
     {
-        return $this->render('file_upload/index.html.twig', [
-            'controller_name' => 'FileUploadController',
-        ]);
-    }
-    #[Route('/uploadfile', name: 'app_upload_file')]
-    public function upload(Request $request)
+    return $this->render('file_upload/index.html.twig', [
+        'controller_name' => 'FileUploadController',
+    ]);
+}
+#[Route('/uploadfile', name:'app_upload_file')]
+function upload(Request $request)
     {
-        //dd($request->files->get('file'));
-
-        // dd($request);
-        // die;
-        $file=$request->files->get('formFile');
-        $uploads_directory=$this->getParameter('uploads_directory');
-
-        $extension = $file->guessExtension();
-       // dd($extension);
-        // if ($extension === 'csv') {
-        //     # code...
-        // }
-        $filename=md5(uniqid()).'.'.$file->guessExtension();
-        $file->move(
-            $uploads_directory,
-            $filename
-        );
-        return new Response("file upload success");
+    $file = $request->files->get('formFile');
+    $uploads_directory = $this->getParameter('uploads_directory');
+    $filename = md5(uniqid()) . '.' . $file->guessExtension();
+    $file->move(
+        $uploads_directory,
+        $filename
+    );
+ 
+    $file_full = $uploads_directory . '/' . $filename;
+    // Open the file
+    $filesize = filesize($file_full); // bytes
+    $filesize = round($filesize / 1024,2);
+    dd($filesize);
+    if (($handle = fopen($file_full, "r")) !== false) {
+        $columns = fgetcsv($handle, 1000, ",");
+        var_dump($columns);
+        die();
+        fclose($handle);
     }
+    return new Response("file upload success");
+}
 }
