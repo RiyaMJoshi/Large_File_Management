@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\MetaTable;
+use App\Repository\MetaTableRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -20,7 +21,7 @@ class FileUploadController extends AbstractController
         ]);
     }
 
-    #[Route('/uploadfile', name:'app_upload_file')]
+    #[Route('/upload', name:'app_upload_file')]
     function upload(Request $request, ManagerRegistry $doctrine)
     {
         //Get and Upload CSV
@@ -75,6 +76,21 @@ class FileUploadController extends AbstractController
         $em->persist($metaTable);
         $em->flush();
 
-        return new Response("file upload success");
+        return $this->redirectToRoute('app_modify_file', [
+            'filename' => (string) $filename,
+        ]);
+    }
+
+    #[Route('/modify', name:'app_modify_file')]
+    public function modify(Request $request, MetaTableRepository $metaTableRepository): Response
+    {   
+        $filename = $request->get('filename');
+
+        $result = $metaTableRepository->getColumnNames($filename);
+        $columns = $result[0]['columns'];
+        // die();
+        return $this->render('file_upload/modify.html.twig', [
+            'columns' => $columns,
+        ]);
     }
 }

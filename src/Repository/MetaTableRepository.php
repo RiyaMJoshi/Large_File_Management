@@ -23,6 +23,17 @@ class MetaTableRepository extends ServiceEntityRepository
         parent::__construct($registry, MetaTable::class);
     }
 
+    public function getColumnNames(string $filename): array // string $filename
+    {
+        return $this->createQueryBuilder('mt')
+            ->addSelect('mt.columns')
+            ->andWhere('mt.filename = :filename')
+            ->setParameter('filename', $filename)
+            ->getQuery()
+            ->getResult()
+        ; 
+    }
+
     /**
      * @throws ORMException
      * @throws OptimisticLockException
