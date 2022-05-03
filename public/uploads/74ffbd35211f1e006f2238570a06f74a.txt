@@ -1,6 +1,0 @@
-title,description,price,shortDescription,createdAtAgo
-"Half-eaten cheese","ID 1 new<br />
-<br />
- data",100,"ID 1 new<br />
-<br />
- data","1 day ago"

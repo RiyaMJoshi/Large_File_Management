@@ -31,24 +31,31 @@ class FileUploadController extends AbstractController
         if ($file->guessExtension() == 'zip') {
             $zipArchive = new ZipArchive();
             $zipArchive->open($file);
+            $stat = $zipArchive->statIndex(0);
 
-            //dd($file);
-            if ($zipArchive) {
-                // Get only the first available CSV File from the Zip
-                $stat = $zipArchive->statIndex(0);
-                //$file = basename($stat['name']);
-                var_dump(basename($stat['name']));
-            }
+            // file1 = Basename = Filename with Extension (string)
+            $file1 = basename($stat['name']);  
+            
+            // $random_num = uniqid(rand(), true);
+            $random_num = md5(uniqid());
+            // Filename after renaming (string)
+            $filename = $random_num . $file1; 
+            
+            // Upload
+            $zipArchive->extractTo($uploads_directory, $file1);
+            $zipArchive->close();
+            rename($uploads_directory."/".$file1, $uploads_directory."/".$filename);
+        } 
+        // Move directly if it is CSV
+        else if ($file->guessExtension() == 'csv') {
+            $filename = md5(uniqid()) . '.' . $file->guessExtension();
+            $file->move(
+                $uploads_directory,
+                $filename
+            );
         }
-        die();
-
-        $filename = md5(uniqid()) . '.' . $file->guessExtension();
-        //$filename = md5(uniqid()) . '.' . 'csv';
-        $file->move(
-            $uploads_directory,
-            $filename
-        );
-
+        
+        // $file_full = Absolute file path
         $file_full = $uploads_directory . '/' . $filename;
         // Open and extract csv
         $filesize = filesize($file_full); // bytes
@@ -58,7 +65,7 @@ class FileUploadController extends AbstractController
             fclose($handle);
         }
 
-        //save to meta table in db
+        // Save to meta_table in db
 
         $metaTable = new MetaTable();
         $em = $doctrine->getManager();
