@@ -13,8 +13,6 @@
     <span class="mb-4">Make CSV files easy to operate by managing them in various ways.</span>
     <form action="{{path('app_upload_file')}}" method="post" class="file-top-margin" enctype="multipart/form-data">
         <div>
-            <!-- MAX_FILE_SIZE must precede the file input field -->
-            <input type="hidden" name="MAX_FILE_SIZE" value="50000M" />
             <input class="form-control" type="file" id="formFile" name="formFile"  accept=".csv, .zip" required="required">
         </div>
 
