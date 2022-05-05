@@ -15,5 +15,5 @@ import './bootstrap';
 import $ from 'jquery';
 
 
- // create global $ and jQuery variables
+// create global $ and jQuery variables
 global.$ = global.jQuery = $;
