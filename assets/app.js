@@ -13,3 +13,7 @@ import './bootstrap';
 
 // Need jQuery?
 import $ from 'jquery';
+
+
+ // create global $ and jQuery variables
+global.$ = global.jQuery = $;

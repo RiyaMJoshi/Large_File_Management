@@ -89,7 +89,7 @@ class FileUploadController extends AbstractController
         $result = $metaTableRepository->getColumnNames($filename);
         $columns = $result[0]['columns'];
         // die();
-        return $this->render('file_upload/modify.html.twig', [
+        return $this->render('file_upload/rough.html.twig', [
             'columns' => $columns,
         ]);
         // return $this->render('file_upload/rough.html.twig');
