@@ -1,20 +1,20 @@
 @import "~bootstrap";
-
 body {
     font-family: spartan;
     color: #444;
 }
-/* #sortable { list-style-type: none; margin: 0; padding: 0; width: 60%; }
-#sortable li { margin: 0 3px 3px 3px; padding: 0.4em; padding-left: 1.5em; font-size: 1.4em; height: 18px; }
-#sortable li span { position: absolute; margin-left: -1.3em; } */
+
+.fa-trash {
+    color: #fff;
+}
 
 .file-top-margin {
     margin-top: 40px;
 }
 
 .jumbotron-img {
-    background: rgb(237,116,88);
-    background: linear-gradient(302deg, rgba(237,116,88,1) 16%, rgba(51,61,81,1) 97%);
+    background: rgb(237, 116, 88);
+    background: linear-gradient(302deg, rgba(237, 116, 88, 1) 16%, rgba(51, 61, 81, 1) 97%);
     color: #fff;
 }
 
@@ -27,10 +27,11 @@ body {
 .q-container-show {
     border-top-right-radius: .25rem;
     border-top-left-radius: .25rem;
-    background-color: #ED7458 ;
+    background-color: #ED7458;
 }
 
-.q-container img, .q-container-show img {
+.q-container img,
+.q-container-show img {
     border: 2px solid #fff;
     border-radius: 50%;
 }
@@ -39,11 +40,13 @@ body {
     background: #fff;
     border-radius: .25rem;
 }
+
 .q-title-show {
     text-transform: uppercase;
     font-size: 1.3rem;
     color: #fff;
 }
+
 .q-title {
     text-transform: uppercase;
     color: #444;
@@ -63,10 +66,11 @@ body {
 }
 
 .answer-link:hover .magic-wand {
-  transform: rotate(20deg);
+    transform: rotate(20deg);
 }
 
-.vote-arrows, .vote-arrows .btn {
+.vote-arrows,
+.vote-arrows .btn {
     font-size: 1.5rem;
 }
 
@@ -82,6 +86,7 @@ body {
 .vote-up:hover {
     color: #3D9970;
 }
+
 .vote-down:hover {
     color: #FF4136;
 }
@@ -89,14 +94,15 @@ body {
 .vote-arrows-alt .vote-up:hover {
     color: #3D9970;
 }
+
 .vote-arrows-alt .vote-down:hover {
     color: rgba(179, 20, 12, 0.63);
 }
 
 .btn-question {
-  color: #FFFFFF;
-  background-color: #ED7458;
-  border-color: #D45B3F;
+    color: #FFFFFF;
+    background-color: #ED7458;
+    border-color: #D45B3F;
 }
 
 .btn-question:hover,
@@ -104,15 +110,15 @@ body {
 .btn-question:active,
 .btn-question.active,
 .open .dropdown-toggle.btn-question {
-  color: #FFFFFF;
-  background-color: #D45B3F;
-  border-color: #D45B3F;
+    color: #FFFFFF;
+    background-color: #D45B3F;
+    border-color: #D45B3F;
 }
 
 .btn-question:active,
 .btn-question.active,
 .open .dropdown-toggle.btn-question {
-  background-image: none;
+    background-image: none;
 }
 
 .btn-question.disabled,
@@ -130,13 +136,13 @@ fieldset[disabled] .btn-question:active,
 .btn-question.disabled.active,
 .btn-question[disabled].active,
 fieldset[disabled] .btn-question.active {
-  background-color: #ED7458;
-  border-color: #D45B3F;
+    background-color: #ED7458;
+    border-color: #D45B3F;
 }
 
 .btn-question .badge {
-  color: #ED7458;
-  background-color: #FFFFFF;
+    color: #ED7458;
+    background-color: #FFFFFF;
 }
 
 footer {
