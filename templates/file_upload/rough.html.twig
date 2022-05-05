@@ -64,6 +64,10 @@
 	
 		$(function () {
 			$("#sortable").sortable();
+            var col_text = $("#sortable").children().find("input"); 
+            col_text.focusout(function(){
+                $(this).attr("disabled", "disabled");
+            })
 		});
 
         $(".editCol").click(function(){
