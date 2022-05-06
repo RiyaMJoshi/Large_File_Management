@@ -15,6 +15,7 @@ use League\Csv\Writer;
 
 class FileUploadController extends AbstractController
 {
+    // Home Page
     #[Route('/', name:'app_homepage')]
     function index(): Response
     {
@@ -23,6 +24,7 @@ class FileUploadController extends AbstractController
         ]);
     }
 
+    // Get File from User and Upl;oad it to the Server (Uploads directory)
     #[Route('/upload', name:'app_upload_file')]
     function upload(Request $request, ManagerRegistry $doctrine)
     {
@@ -83,6 +85,7 @@ class FileUploadController extends AbstractController
         ]);
     }
 
+    // Fetch Column Names from Database to manipulate further
     #[Route('/modify', name:'app_modify_file')]
     public function modify(Request $request, MetaTableRepository $metaTableRepository): Response
     {   
@@ -98,6 +101,8 @@ class FileUploadController extends AbstractController
         // return $this->render('file_upload/rough.html.twig');
 
     }
+
+    // Export the modified CSV
     #[Route('/export', name:'app_export')]
     public function export(Request $request): Response
     {    
@@ -106,15 +111,19 @@ class FileUploadController extends AbstractController
         $file_full = $uploads_directory . '/' . $filename;
       
         $column = $request->get('text');
-        $list = array($column);//array of columns from ui
+        // Array of columns from UI
+        $list = array($column); 
         $fp = fopen('php://output', 'w');
 
+        // Setting Latest Column Headers in new CSV
          foreach ($list as $fields) {
             fputcsv($fp, $fields);
       }
 
         $reader = Reader::createFromPath($file_full);
         $reader->setHeaderOffset(0);
+
+        // Putting contents from second line of uploaded CSV
         $records = $reader->getRecords($column);
         foreach ($records as $offset => $record) {
             fputcsv($fp,$record);    
@@ -122,9 +131,8 @@ class FileUploadController extends AbstractController
         $response = new Response();
         $response->headers->set('Content-Type', 'text/csv');
         
-        //it's gonna output in a testing.csv file
+        // It's gonna output in a testing.csv file
         $response->headers->set('Content-Disposition', 'attachment; filename="testing.csv"');
         return $response;
-    
-}
+    }
 }
