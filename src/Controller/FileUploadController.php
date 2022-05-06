@@ -10,6 +10,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use ZipArchive;
+use League\Csv\Reader;
+use League\Csv\Writer;
 
 class FileUploadController extends AbstractController
 {
@@ -104,28 +106,25 @@ class FileUploadController extends AbstractController
         $file_full = $uploads_directory . '/' . $filename;
       
         $column = $request->get('text');
-        $list = array($column);
+        $list = array($column);//array of columns from ui
         $fp = fopen('php://output', 'w');
 
-        foreach ($list as $fields) {
+         foreach ($list as $fields) {
             fputcsv($fp, $fields);
+      }
+
+        $reader = Reader::createFromPath($file_full);
+        $reader->setHeaderOffset(0);
+        $records = $reader->getRecords($column);
+        foreach ($records as $offset => $record) {
+            fputcsv($fp,$record);    
         }
-        //putting contents of csv from second line of uploaded csv
-        $row = 1;
-        if (($handle = fopen($file_full, "r")) !== false) {
-            while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
-                if($row == 1){ 
-                    $row++; continue; 
-                }
-                fputcsv($fp, $data);
-                $row++;
-        }
-        fclose($handle);
         $response = new Response();
         $response->headers->set('Content-Type', 'text/csv');
+        
         //it's gonna output in a testing.csv file
         $response->headers->set('Content-Disposition', 'attachment; filename="testing.csv"');
         return $response;
-    }
+    
 }
 }
