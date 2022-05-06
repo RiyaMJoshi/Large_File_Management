@@ -40,6 +40,7 @@
 					data-back-btn-text="back">
 					<div data-role="header" id="headerid" class="ui-bar ui-bar-b">
 						{# {{ filename }} #}
+						<form class="form-group" action="{{path('app_export')}}">
 						<ul class="list-group" id="sortable">
 							{% for column in columns %}
 							<li data-role="content" class="input-group d-flex mb-3" id="contentid">
@@ -49,7 +50,10 @@
                                 <span class="input-group-text deleteCol bg-danger"><i class="fa fa-trash"></i></span>
 							</li>
 							{% endfor %}
+							<input type="hidden" name="filename" value="{{ filename }}">
+						<input type="submit" id="sub" class="btn btn-dark me-md-2" style="width:20%" value="Export">
 						</ul>
+						</form>
 					</div>
 					{# <ul id="myEditor" class="sortableLists list-group">
 					</ul> #}
