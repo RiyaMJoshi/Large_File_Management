@@ -106,6 +106,7 @@ class FileUploadController extends AbstractController
     #[Route('/export', name:'app_export')]
     public function export(Request $request): Response
     {    
+        ob_start();
         $uploads_directory = $this->getParameter('uploads_directory');
         $filename = $request->get('filename');
         $file_full = $uploads_directory . '/' . $filename;
@@ -116,9 +117,9 @@ class FileUploadController extends AbstractController
         $fp = fopen('php://output', 'w');
 
         // Setting Latest Column Headers in new CSV
-         foreach ($list as $fields) {
+        foreach ($list as $fields) {
             fputcsv($fp, $fields);
-      }
+        }
 
         $reader = Reader::createFromPath($file_full);
         $reader->setHeaderOffset(0);
@@ -128,11 +129,14 @@ class FileUploadController extends AbstractController
         foreach ($records as $offset => $record) {
             fputcsv($fp,$record);    
         }
+        
         $response = new Response();
-        $response->headers->set('Content-Type', 'text/csv');
+        // $response->headers->set('Content-Type', 'text/csv');
+        $response->headers->set('Content-Type', 'binary/octet-stream');
         
         // It's gonna output in a testing.csv file
         $response->headers->set('Content-Disposition', 'attachment; filename="testing.csv"');
         return $response;
+        ob_clean();
     }
 }
