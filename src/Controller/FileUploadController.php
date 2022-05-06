@@ -98,17 +98,34 @@ class FileUploadController extends AbstractController
     }
     #[Route('/export', name:'app_export')]
     public function export(Request $request): Response
-    {   
+    {    
+        $uploads_directory = $this->getParameter('uploads_directory');
+        $filename = $request->get('filename');
+        $file_full = $uploads_directory . '/' . $filename;
       
-       // return new Response("exporttt");
-        $filename = $request->query->all();
-        dump($filename);
-        die();
-        // for( $i=0;$i<5;$i++){
-        //     $column = $request->get('column');
-        //     dd($column[0]);
-           
-        // }
-        //  die();
+        $column = $request->get('text');
+        $list = array($column);
+        $fp = fopen('php://output', 'w');
+
+        foreach ($list as $fields) {
+            fputcsv($fp, $fields);
+        }
+        //putting contents of csv from second line of uploaded csv
+        $row = 1;
+        if (($handle = fopen($file_full, "r")) !== false) {
+            while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+                if($row == 1){ 
+                    $row++; continue; 
+                }
+                fputcsv($fp, $data);
+                $row++;
+        }
+        fclose($handle);
+        $response = new Response();
+        $response->headers->set('Content-Type', 'text/csv');
+        //it's gonna output in a testing.csv file
+        $response->headers->set('Content-Disposition', 'attachment; filename="testing.csv"');
+        return $response;
     }
+}
 }
