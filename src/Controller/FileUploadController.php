@@ -91,8 +91,24 @@ class FileUploadController extends AbstractController
         // die();
         return $this->render('file_upload/modify.html.twig', [
             'columns' => $columns,
+            'filename' => $filename,
         ]);
         // return $this->render('file_upload/rough.html.twig');
 
+    }
+    #[Route('/export', name:'app_export')]
+    public function export(Request $request): Response
+    {   
+      
+       // return new Response("exporttt");
+        $filename = $request->query->all();
+        dump($filename);
+        die();
+        // for( $i=0;$i<5;$i++){
+        //     $column = $request->get('column');
+        //     dd($column[0]);
+           
+        // }
+        //  die();
     }
 }
