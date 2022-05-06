@@ -42,14 +42,12 @@
 						{# {{ filename }} #}
 						<ul class="list-group" id="sortable">
 							{% for column in columns %}
-							<li data-role="content" class="d-flex mb-3" id="contentid">
-                                {# <i class="fas fa-sort mt-2"></i> #}
-								<input class="list-group-item fs-6" style="width:90%" name="text" value="{{column}}" disabled="disabled"/>
-								<button id="editCol" class="btn btn-primary mx-2 editCol"><i class="fa fa-edit"></i></button>
-								<button id="deleteCol" class="btn btn-danger deleteCol"><i class="fa fa-trash"></i></button>
-							
+							<li data-role="content" class="input-group d-flex mb-3" id="contentid">
+                                {# <span class="input-group-text"><i class='fa fa-arrows-alt'></i></span> #}
+                                <span class="input-group-text"><i class='fa fa-sort'></i></span>
+								<input class="form-control list-group-item fs-6" style="width:90%" name="text[]" value="{{column}}"/>
+                                <span class="input-group-text deleteCol bg-danger"><i class="fa fa-trash"></i></span>
 							</li>
-
 							{% endfor %}
 						</ul>
 					</div>
@@ -64,17 +62,13 @@
 	
 		$(function () {
 			$("#sortable").sortable();
-            var col_text = $("#sortable").children().find("input"); 
-            col_text.focusout(function(){
-                $(this).attr("disabled", "disabled");
-            })
 		});
 
-        $(".editCol").click(function(){
+        {# $(".editCol").click(function(){
             $(this).parent().find("input").removeAttr("disabled").focus();
             var curr = $(this).parent().find("input");
             console.log(curr);
-        });
+        }); #}
 
         $(".deleteCol").click(function(){
             if(confirm('Are you sure you want to delete this column?')) {
