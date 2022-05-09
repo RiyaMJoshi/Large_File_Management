@@ -66,7 +66,7 @@ class FileUploadController extends AbstractController
         $filesize = filesize($file_full); // bytes
         $filesize = round($filesize / 1024, 2);
         if (($handle = fopen($file_full, "r")) !== false) {
-            $columns = fgetcsv($handle, 1000, ",");
+            $columns = fgetcsv($handle, 3000, ",");
             fclose($handle);
         }
 
@@ -111,24 +111,49 @@ class FileUploadController extends AbstractController
         $filename = $request->get('filename');
         $file_full = $uploads_directory . '/' . $filename;
       
+        // Original Index wise Columns
+        $original_cols = $request->get('original_cols');
+        // var_dump($original_cols);
+
+        // Modified Index wise Columns
         $column = $request->get('text');
+        // var_dump($column);
+        // die();
         // Array of columns from UI
         $list = array($column); 
         $fp = fopen('php://output', 'w');
 
         // Setting Latest Column Headers in new CSV
-        foreach ($list as $fields) {
-            fputcsv($fp, $fields);
-        }
+        // foreach ($list as $fields) {
+        //     fputcsv($fp, $fields);
+        // }
 
         $reader = Reader::createFromPath($file_full);
         $reader->setHeaderOffset(0);
 
         // Putting contents from second line of uploaded CSV
-        $records = $reader->getRecords($column);
-        foreach ($records as $offset => $record) {
-            fputcsv($fp,$record);    
+        // $records = $reader->getRecords($column);
+
+        foreach ($list as $offset => $fields) {
+            fputcsv($fp, $fields);
+            //var_dump($fields); // As per new list
+            foreach ($fields as $key => $field) {
+                $records = iterator_to_array($reader->fetchColumnByName($field));
+                // foreach ($records as $i => $data) {
+                    // var_dump($data);
+                    // fputcsv($fp, $records); 
+                // }
+                var_dump($records);
+            }
+            // $records = $reader->fetchColumnByOffset($offset);
+            // var_dump($records);
+            // foreach ($records as $offset => $record) {
+            //     var_dump($record);
+            //     // fputcsv($fp,$record);    
+            // }
         }
+        
+        die();
         
         $response = new Response();
         // $response->headers->set('Content-Type', 'text/csv');

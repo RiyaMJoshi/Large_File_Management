@@ -43,6 +43,7 @@
 						<form class="form-group" action="{{path('app_export')}}">
 						<ul class="list-group" id="sortable">
 							{% for column in columns %}
+							<input type="hidden" name="original_cols[]" value="{{column}}">
 							<script></script>
 							<li data-role="content" class="input-group d-flex mb-3" id="contentid">
                                 {# <span class="input-group-text"><i class='fa fa-arrows-alt'></i></span> #}
