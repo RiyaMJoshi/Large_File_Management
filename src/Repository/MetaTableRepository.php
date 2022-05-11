@@ -58,6 +58,15 @@ class MetaTableRepository extends ServiceEntityRepository
         }
     }
 
+    public function createDynamicTable($sql){
+
+        $em = $this->getEntityManager();
+
+        $stmt = $em->getConnection()->prepare($sql);
+        $stmt->executeQuery();
+
+    }
+
     // /**
     //  * @return MetaTable[] Returns an array of MetaTable objects
     //  */

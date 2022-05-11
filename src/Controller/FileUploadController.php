@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use ZipArchive;
 use League\Csv\Reader;
+use Doctrine\ORM\EntityManagerInterface;
 use League\Csv\Writer;
 use Doctrine\ORM\Mapping as ORM;
 class FileUploadController extends AbstractController
@@ -26,8 +27,9 @@ class FileUploadController extends AbstractController
 
     // Get File from User and Upl;oad it to the Server (Uploads directory)
     #[Route('/upload', name:'app_upload_file')]
-    function upload(Request $request, ManagerRegistry $doctrine)
+    function upload(Request $request, ManagerRegistry $doctrine,EntityManagerInterface $entityManager)
     {
+        $entityManager = $doctrine->getManager(); 
         //Get and Upload CSV
         $file = $request->files->get('formFile');
         $uploads_directory = $this->getParameter('uploads_directory');
@@ -70,11 +72,23 @@ class FileUploadController extends AbstractController
             fclose($handle);
         }
 
+        
         $sql= 'CREATE TABLE table_name (';
         for($i=0;$i<count($columns); $i++) {
-        $sql .= $columns[$i].' Text(500), ';
+        $sql .= $columns[$i].' VARCHAR(50) ';
+
+        if($i < count($columns) - 1)
+            $sql .= ',';
         }
         $sql .= ')';
+
+       // echo $sql; die;
+      //  $em = $doctrine->getManager();
+      $conn = $entityManager->getRepository(MetaTable::class)->createDynamicTable($sql);
+      //$stmt = $conn->prepare($sql);
+      //$stmt->execute();
+      
+       // return $stmt->fetchAll();
         echo $sql;
         die($sql);
       
