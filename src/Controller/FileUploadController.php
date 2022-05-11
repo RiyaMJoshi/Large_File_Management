@@ -12,7 +12,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use ZipArchive;
 use League\Csv\Reader;
 use League\Csv\Writer;
-
+use Doctrine\ORM\Mapping as ORM;
 class FileUploadController extends AbstractController
 {
     // Home Page
@@ -70,21 +70,34 @@ class FileUploadController extends AbstractController
             fclose($handle);
         }
 
+        $sql= 'CREATE TABLE table_name (';
+        for($i=0;$i<count($columns); $i++) {
+        $sql .= $columns[$i].' Text(500), ';
+        }
+        $sql .= ')';
+        echo $sql;
+        die($sql);
+      
+        }
+        // exec(' csvsql --db mysql+mysqldb://root:password@localhost:3306/company --tables newtab2 --insert /home/sakshigoraniya/Desktop/csvs/2gb.csv
+        // ', $output);
+        // echo $output;
+    
+
         // Save to meta_table in db
 
-        $metaTable = new MetaTable();
-        $em = $doctrine->getManager();
-        $metaTable->setFilename($filename);
-        $metaTable->setFilesize($filesize);
-        $metaTable->setColumns($columns);
-        $em->persist($metaTable);
-        $em->flush();
+        // $metaTable = new MetaTable();
+        // $em = $doctrine->getManager();
+        // $metaTable->setFilename($filename);
+        // $metaTable->setFilesize($filesize);
+        // $metaTable->setColumns($columns);
+        // $em->persist($metaTable);
+        // $em->flush();
 
-        return $this->redirectToRoute('app_modify_file', [
-            'filename' => (string) $filename,
-        ]);
-    }
-
+        // return $this->redirectToRoute('app_modify_file', [
+        //     'filename' => (string) $filename,
+        // ]);
+    
     // Fetch Column Names from Database to manipulate further
     #[Route('/modify', name:'app_modify_file')]
     public function modify(Request $request, MetaTableRepository $metaTableRepository): Response
@@ -104,17 +117,15 @@ class FileUploadController extends AbstractController
 
     // Export the modified CSV
     #[Route('/export', name:'app_export')]
-    public function export(Request $request): Response
+    public function exportt(Request $request): Response
     {    
         ob_start();
         $uploads_directory = $this->getParameter('uploads_directory');
         $filename = $request->get('filename');
         $file_full = $uploads_directory . '/' . $filename;
-      
         // Original Index wise Columns
         $original_cols = $request->get('original_cols');
         // var_dump($original_cols);
-
         // Modified Index wise Columns
         $column = $request->get('text');
         // var_dump($column);
@@ -122,39 +133,64 @@ class FileUploadController extends AbstractController
         // Array of columns from UI
         $list = array($column); 
         $fp = fopen('php://output', 'w');
-
         // Setting Latest Column Headers in new CSV
         // foreach ($list as $fields) {
         //     fputcsv($fp, $fields);
         // }
-
         $reader = Reader::createFromPath($file_full);
+        // $writer = Writer::createFromPath('', 'w+');
         $reader->setHeaderOffset(0);
-
         // Putting contents from second line of uploaded CSV
         // $records = $reader->getRecords($column);
-
-        foreach ($list as $offset => $fields) {
-            fputcsv($fp, $fields);
+        $arr = [];
+        foreach ($list as $fields) {
+            array_push($arr, $fields);
+            // fputcsv($fp, $fields);
+        }
             //var_dump($fields); // As per new list
             foreach ($fields as $key => $field) {
+
+                dd($arr);
                 $records = iterator_to_array($reader->fetchColumnByName($field));
+                $arr = $records; 
+                // $records = $reader->getRecords();
                 // foreach ($records as $i => $data) {
-                    // var_dump($data);
-                    // fputcsv($fp, $records); 
+                    // dd($records);
+                     //fputcsv($fp, $records);
+                // foreach ($records as $i => $data) {
+                    // dd($records);
+                     //fputcsv($fp, $records); 
+                   
                 // }
-                var_dump($records);
+                //var_dump($records);
             }
+            // $writer->insertAll($arr);
             // $records = $reader->fetchColumnByOffset($offset);
             // var_dump($records);
             // foreach ($records as $offset => $record) {
             //     var_dump($record);
-            //     // fputcsv($fp,$record);    
+                // fputcsv($fp,$arr);    
             // }
-        }
+            dd($arr);
+            foreach ($arr as $fields) {
+                fputcsv($fp, $fields);
+            }
+            fclose($fp);
+        //   foreach ($records as $offset => $record) {
+        //            foreach($column as $col){
+        //            //dd($record[$col]);
+        //         $arr=array();
+        //         array_push($arr,$record[$col]);
+        //       // print_r($arr); 
+        //     }
+        //die();
+        // $response = new Response();
+        // $response->headers->set('Content-Type', 'binary/octet-stream');
         
-        die();
-        
+        // // It's gonna output in a testing.csv file
+        // $response->headers->set('Content-Disposition', 'attachment; filename="testing.csv"');
+        // return $response;
+        // ob_clean();
         $response = new Response();
         // $response->headers->set('Content-Type', 'text/csv');
         $response->headers->set('Content-Type', 'binary/octet-stream');
@@ -164,4 +200,20 @@ class FileUploadController extends AbstractController
         return $response;
         ob_clean();
     }
+    
+    #[Route('/store', name:'app_store_csv')]
+    public function storetodb(ManagerRegistry $doctrine): Response
+    {
+
+   
+        return new Response("saved");
+    }
+       
 }
+
+
+
+
+
+
+
