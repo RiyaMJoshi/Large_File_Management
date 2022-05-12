@@ -58,7 +58,7 @@ class MetaTableRepository extends ServiceEntityRepository
         }
     }
 
-    public function createDynamicTable($sql){
+    public function createOrDropDynamicTable($sql){
 
         $em = $this->getEntityManager();
 

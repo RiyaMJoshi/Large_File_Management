@@ -14,6 +14,7 @@ use League\Csv\Reader;
 use Doctrine\ORM\EntityManagerInterface;
 use League\Csv\Writer;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Session\Session;
 class FileUploadController extends AbstractController
 {
@@ -98,7 +99,7 @@ class FileUploadController extends AbstractController
         LINES TERMINATED BY '\n'
         IGNORE 1 LINES;
         eof;
-        $conn = $entityManager->getRepository(MetaTable::class)->createDynamicTable($sql);
+        $conn = $entityManager->getRepository(MetaTable::class)->createOrDropDynamicTable($sql);
         $conn = $entityManager->getRepository(MetaTable::class)->addDataToTable($insert_sql);
     
         // Save to meta_table in db
@@ -177,6 +178,15 @@ class FileUploadController extends AbstractController
         
         // It's gonna output in a testing.csv file
         $response->headers->set('Content-Disposition', 'attachment; filename="testing.csv"');
+
+        // Delete file from uploads directory
+        $fileSystem = new Filesystem();
+        $fileSystem->remove($file_full);
+
+        // Delete file_table from Database
+        $drop_sql="DROP TABLE `$trimmed`";
+        $conn = $entityManager->getRepository(MetaTable::class)->createOrDropDynamicTable($drop_sql);
+
         return $response;
         ob_clean();
     }
