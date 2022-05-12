@@ -66,6 +66,23 @@ class MetaTableRepository extends ServiceEntityRepository
         $stmt->executeQuery();
 
     }
+    public function addDataToTable($sql){
+
+        $em = $this->getEntityManager();
+
+        $stmt = $em->getConnection()->prepare($sql);
+        $stmt->executeQuery();
+
+    }
+    public function getUpdatedcsv($sql){
+
+        $em = $this->getEntityManager();
+
+        $stmt = $em->getConnection()->prepare($sql);
+        $conn=$stmt->executeQuery()->fetchAllAssociative();
+        return $conn;        
+        
+    }
 
     // /**
     //  * @return MetaTable[] Returns an array of MetaTable objects
