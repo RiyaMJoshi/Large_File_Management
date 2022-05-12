@@ -137,10 +137,11 @@ class FileUploadController extends AbstractController
         $file_full = $uploads_directory . '/' . $filename;
 
         // Modified Index wise Columns
-        $column = $request->get('text');
+        $original_column = $request->get('original_cols');
+        $renamed_column = $request->get('text');
         // Array of columns from UI
-        $list = array($column); 
-        $newlist=$list;
+        $list = array($renamed_column); 
+        //$newlist=$list;
         $fp = fopen('php://output', 'w');
         foreach ($list as $fields) {
             fputcsv($fp, $fields);
@@ -150,9 +151,9 @@ class FileUploadController extends AbstractController
 
         //sql query for fetching modified csv data from table
         $fetch_sql = 'SELECT ';
-        for($i=0;$i<count($column); $i++) {
-            $fetch_sql .= '`' . $column[$i] . '`' ;
-            if($i < count($column) - 1)
+        for($i=0;$i<count($original_column); $i++) {
+            $fetch_sql .= '`' . $original_column[$i] . '`' ;
+            if($i < count($original_column) - 1)
                 $fetch_sql .= ',';
         }
         $fetch_sql .= ' FROM ' .$trimmed;
