@@ -21,7 +21,7 @@ class MetaTable
 
     #[ORM\Column(type: 'json')]
     private $columns = [];
-
+    
     public function getId(): ?int
     {
         return $this->id;

@@ -14,6 +14,7 @@ use League\Csv\Reader;
 use Doctrine\ORM\EntityManagerInterface;
 use League\Csv\Writer;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\HttpFoundation\Session\Session;
 class FileUploadController extends AbstractController
 {
     // Home Page
@@ -65,6 +66,10 @@ class FileUploadController extends AbstractController
                 $filename
             );
         }
+        // Set filename as session
+        $session = new Session();
+        //$session->start();
+        $session->set('user_id', $random_num);
         // $file_full = Absolute file path
         $file_full = $uploads_directory . '/' . $filename;
         // Open and extract csv
@@ -129,8 +134,7 @@ class FileUploadController extends AbstractController
     // Export the modified CSV
     #[Route('/export', name:'app_export')]
     public function export(Request $request,EntityManagerInterface $entityManager): Response
-    {    
-        
+    {      
         ob_start();
         $uploads_directory = $this->getParameter('uploads_directory');
         $filename = $request->get('filename');
@@ -165,7 +169,9 @@ class FileUploadController extends AbstractController
         foreach ($conn as $fields) {
             fputcsv($fp, $fields);
         }
-
+        $session = $request->getSession();
+        $session->invalidate();
+        //$s=$session->get('user_id');dd($s)
         $response = new Response();
         $response->headers->set('Content-Type', 'binary/octet-stream');
         
