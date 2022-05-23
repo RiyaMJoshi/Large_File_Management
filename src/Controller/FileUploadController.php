@@ -27,14 +27,18 @@ class FileUploadController extends AbstractController
         ]);
     }
 
-    // Get File from User and Upl;oad it to the Server (Uploads directory)
+    // Get File from User and Upload it to the Server ( Plus Uploads directory)
     #[Route('/upload', name:'app_upload_file')]
-    function upload(Request $request, ManagerRegistry $doctrine,EntityManagerInterface $entityManager)
+    function upload(Request $request, ManagerRegistry $doctrine, EntityManagerInterface $entityManager)
     {
       
         $entityManager = $doctrine->getManager(); 
         //Get and Upload CSV
         $file = $request->files->get('formFile');
+
+        // Get Original FileName without Extension
+        $originalFileName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        // dd($originalFileName);
         $uploads_directory = $this->getParameter('uploads_directory');
 
         // Extract file if it is zip
@@ -45,11 +49,14 @@ class FileUploadController extends AbstractController
 
             // file1 = Basename = Filename with Extension (string)
             $file1 = basename($stat['name']);  
+
+            // Extension of file inside the zip file
+            $fileExt = '.' . pathinfo($stat['name'], PATHINFO_EXTENSION);
             
             // $random_num = uniqid(rand(), true);
             $random_num = md5(uniqid());
             // Filename after renaming (string)
-            $filename = $random_num . $file1; 
+            $filename = $random_num . $fileExt; 
             
             // Upload
             $zipArchive->extractTo($uploads_directory, $file1);
@@ -81,14 +88,14 @@ class FileUploadController extends AbstractController
             fclose($handle);
         }
         //sql query for creating csv table
-        $sql= 'CREATE TABLE '.$random_num.' (';
+        $create_table_sql= 'CREATE TABLE '.$random_num.' (';
         for($i=0;$i<count($columns); $i++) {
-            $sql .= '`' . $columns[$i].'` VARCHAR(50) ';
+            $create_table_sql .= '`' . $columns[$i].'` TEXT ';
 
             if($i < count($columns) - 1)
-                $sql .= ',';
+                $create_table_sql .= ',';
         }
-        $sql .= ')';
+        $create_table_sql .= ')';
 
         //sql query for importing data to table from csv
         $insert_sql=<<<eof
@@ -99,7 +106,7 @@ class FileUploadController extends AbstractController
         LINES TERMINATED BY '\n'
         IGNORE 1 LINES;
         eof;
-        $conn = $entityManager->getRepository(MetaTable::class)->createOrDropDynamicTable($sql);
+        $conn = $entityManager->getRepository(MetaTable::class)->createOrDropDynamicTable($create_table_sql);
         $conn = $entityManager->getRepository(MetaTable::class)->addDataToTable($insert_sql);
     
         // Save to meta_table in db
@@ -109,6 +116,7 @@ class FileUploadController extends AbstractController
         $metaTable->setFilename($filename);
         $metaTable->setFilesize($filesize);
         $metaTable->setColumns($columns);
+        $metaTable->setOriginalFileName($originalFileName);
         $em->persist($metaTable);
         $em->flush();
 
@@ -151,8 +159,8 @@ class FileUploadController extends AbstractController
         foreach ($list as $fields) {
             fputcsv($fp, $fields);
         }
-        $search = '.csv' ;
-        $trimmed = str_replace($search, '', $filename) ;
+        $ext = '.csv' ;
+        $table = str_replace($ext, '', $filename) ;
 
         //sql query for fetching modified csv data from table
         $fetch_sql = 'SELECT ';
@@ -161,9 +169,12 @@ class FileUploadController extends AbstractController
             if($i < count($original_column) - 1)
                 $fetch_sql .= ',';
         }
-        $fetch_sql .= ' FROM ' .$trimmed;
+        $fetch_sql .= ' FROM ' .$table;
      
         $conn = $entityManager->getRepository(MetaTable::class)->getUpdatedcsv($fetch_sql);
+        $metaRecord = $entityManager->getRepository(MetaTable::class)->findOneBy(['filename' => $filename]);
+        $originalFileName = $metaRecord->getOriginalFileName();
+        $convertedFileName = "converted_" . $originalFileName;
       
         $reader = Reader::createFromPath($file_full);
         $reader->setHeaderOffset(0);
@@ -177,15 +188,15 @@ class FileUploadController extends AbstractController
         $response->headers->set('Content-Type', 'binary/octet-stream');
         
         // It's gonna output in a testing.csv file
-        $response->headers->set('Content-Disposition', 'attachment; filename="testing.csv"');
+        $response->headers->set('Content-Disposition', 'attachment; filename="'.$convertedFileName.'.csv"');
 
         // Delete file from uploads directory
         $fileSystem = new Filesystem();
         $fileSystem->remove($file_full);
 
         // Delete file_table from Database
-        $drop_sql="DROP TABLE `$trimmed`";
-        $conn = $entityManager->getRepository(MetaTable::class)->createOrDropDynamicTable($drop_sql);
+        $drop_table_sql="DROP TABLE `$table`";
+        $conn = $entityManager->getRepository(MetaTable::class)->createOrDropDynamicTable($drop_table_sql);
 
         return $response;
         ob_clean();

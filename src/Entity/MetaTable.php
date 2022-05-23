@@ -21,6 +21,9 @@ class MetaTable
 
     #[ORM\Column(type: 'json')]
     private $columns = [];
+
+    #[ORM\Column(type: 'string', length: 255)]
+    private $originalFileName;
     
     public function getId(): ?int
     {
@@ -59,6 +62,18 @@ class MetaTable
     public function setColumns(array $columns): self
     {
         $this->columns = $columns;
+
+        return $this;
+    }
+
+    public function getOriginalFileName(): ?string
+    {
+        return $this->originalFileName;
+    }
+
+    public function setOriginalFileName(string $originalFileName): self
+    {
+        $this->originalFileName = $originalFileName;
 
         return $this;
     }
