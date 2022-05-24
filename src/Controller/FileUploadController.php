@@ -14,7 +14,9 @@ use League\Csv\Reader;
 use Doctrine\ORM\EntityManagerInterface;
 use League\Csv\Writer;
 use Doctrine\ORM\Mapping as ORM;
+use PhpParser\Node\Scalar\MagicConst\File;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Session\Session;
 class FileUploadController extends AbstractController
 {
@@ -38,7 +40,6 @@ class FileUploadController extends AbstractController
 
         // Get Original FileName without Extension
         $originalFileName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-        // dd($originalFileName);
         $uploads_directory = $this->getParameter('uploads_directory');
 
         // Extract file if it is zip
@@ -154,52 +155,64 @@ class FileUploadController extends AbstractController
         $renamed_column = $request->get('text');
         // Array of columns from UI
         $list = array($renamed_column); 
-        //$newlist=$list;
-        $fp = fopen('php://output', 'w');
-        foreach ($list as $fields) {
-            fputcsv($fp, $fields);
-        }
-        $ext = '.csv' ;
-        $table = str_replace($ext, '', $filename) ;
-
-        //sql query for fetching modified csv data from table
-        $fetch_sql = 'SELECT ';
-        for($i=0;$i<count($original_column); $i++) {
-            $fetch_sql .= '`' . $original_column[$i] . '`' ;
-            if($i < count($original_column) - 1)
-                $fetch_sql .= ',';
-        }
-        $fetch_sql .= ' FROM ' .$table;
-     
-        $conn = $entityManager->getRepository(MetaTable::class)->getUpdatedcsv($fetch_sql);
-        $metaRecord = $entityManager->getRepository(MetaTable::class)->findOneBy(['filename' => $filename]);
-        $originalFileName = $metaRecord->getOriginalFileName();
-        $convertedFileName = "converted_" . $originalFileName;
-      
-        $reader = Reader::createFromPath($file_full);
-        $reader->setHeaderOffset(0);
-        foreach ($conn as $fields) {
-            fputcsv($fp, $fields);
-        }
-        $session = $request->getSession();
-        $session->invalidate();
-        //$s=$session->get('user_id');dd($s)
-        $response = new Response();
-        $response->headers->set('Content-Type', 'binary/octet-stream');
         
-        // It's gonna output in a testing.csv file
-        $response->headers->set('Content-Disposition', 'attachment; filename="'.$convertedFileName.'.csv"');
+        $ext = '.csv' ;
+        $table = str_replace($ext, '', $filename);
 
-        // Delete file from uploads directory
-        $fileSystem = new Filesystem();
-        $fileSystem->remove($file_full);
+        // Process only if Table exixts (Page is neither refreshed nor multiple times exported)
+        if ($entityManager->getRepository(MetaTable::class)->table_exists($table)) {        
+            
+            $fp = fopen('php://output', 'w');
+            foreach ($list as $fields) {
+                fputcsv($fp, $fields);
+            }
+            
+            //sql query for fetching modified csv data from table
+            $fetch_sql = 'SELECT ';
+            for($i=0;$i<count($original_column); $i++) {
+                $fetch_sql .= '`' . $original_column[$i] . '`' ;
+                if($i < count($original_column) - 1)
+                    $fetch_sql .= ',';
+            }
+            $fetch_sql .= ' FROM ' .$table;
+     
+            $conn = $entityManager->getRepository(MetaTable::class)->getUpdatedcsv($fetch_sql);
+            $metaRecord = $entityManager->getRepository(MetaTable::class)->findOneBy(['filename' => $filename]);
+            $originalFileName = $metaRecord->getOriginalFileName();
+            $convertedFileName = "converted_" . $originalFileName;
+        
+            $reader = Reader::createFromPath($file_full);
+            $reader->setHeaderOffset(0);
+            foreach ($conn as $fields) {
+                fputcsv($fp, $fields);
+            }
+        
+            $session = $request->getSession();
+            $session->invalidate();
+            $response = new Response();
+            $response->headers->set('Content-Type', 'binary/octet-stream');
+            
+            // It's gonna output in a converted_originalFilename.csv file
+            $response->headers->set('Content-Disposition', 'attachment; filename="'.$convertedFileName.'.csv"');
+            
+            // Delete file from uploads directory
+            $fileSystem = new Filesystem();
+            $fileSystem->remove($file_full);
+            
+            // Delete file_table from Database
+            $drop_table_sql="DROP TABLE `$table`";
+            $conn = $entityManager->getRepository(MetaTable::class)->createOrDropDynamicTable($drop_table_sql);
 
-        // Delete file_table from Database
-        $drop_table_sql="DROP TABLE `$table`";
-        $conn = $entityManager->getRepository(MetaTable::class)->createOrDropDynamicTable($drop_table_sql);
-
-        return $response;
-        ob_clean();
+            // return new BinaryFileResponse();
+            
+            // $response->headers->set('Location', 'file_upload/index.html.twig');
+            // header('Location : /file_upload');
+            return $response;
+            ob_clean();
+        }
+        else {
+            return $this->render('/failure/table_failure.html.twig');
+        }
     }
        
 }

@@ -84,6 +84,27 @@ class MetaTableRepository extends ServiceEntityRepository
         
     }
 
+    // Check if table exists or not (As the Table gets deleted once clicked on Export)
+    public function table_exists(string $table): bool
+    {
+        $em = $this->getEntityManager();
+
+        $table_exists_sql = <<<eof
+        SELECT COUNT(*) AS 'Count'
+        FROM information_schema.tables 
+        WHERE table_schema = 'csvManager' 
+        AND table_name = '$table';
+        eof;
+        $stmt = $em->getConnection()->prepare($table_exists_sql);
+        $conn=$stmt->executeQuery()->fetchAllAssociative()[0]['Count'];
+
+        // dd($conn);
+        if (!$conn) {
+            return false;
+        }
+        return true;        
+    }
+
     // /**
     //  * @return MetaTable[] Returns an array of MetaTable objects
     //  */
